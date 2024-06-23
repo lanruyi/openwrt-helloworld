@@ -1,0 +1,61 @@
+name: Update-openwrt-helloworld
+
+on:
+  schedule:
+    - cron: 0/3 * * * *
+
+jobs:
+
+  prepare:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        ref: main
+        fetch-depth: 0
+        lfs: true
+
+    - name: Set git identity
+      run : |
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+    - name: Load latest openwrt-helloworld
+      run: |
+        git clone -b master https://github.com/fw876/helloworld.git --depth=1 ./tmp/helloworld
+        cp -rf ./tmp/helloworld/luci-app-ssr-plus ./
+        cp -rf ./tmp/helloworld/tcping ./
+        cp -rf ./tmp/helloworld/naiveproxy ./
+        cp -rf ./tmp/helloworld/xray-core ./
+        cp -rf ./tmp/helloworld/xray-plugin ./
+        cp -rf ./tmp/helloworld/v2raya ./
+        cp -rf ./tmp/helloworld/v2ray-plugin ./
+        cp -rf ./tmp/helloworld/v2ray-core ./
+        cp -rf ./tmp/helloworld/tuic-client ./
+        cp -rf ./tmp/helloworld/trojan ./
+        cp -rf ./tmp/helloworld/simple-obfs ./
+        cp -rf ./tmp/helloworld/shadowsocksr-libev ./
+        cp -rf ./tmp/helloworld/shadowsocks-rust ./
+        cp -rf ./tmp/helloworld/shadow-tls ./
+        cp -rf ./tmp/helloworld/redsocks2 ./
+        cp -rf ./tmp/helloworld/mosdns ./
+        cp -rf ./tmp/helloworld/microsocks ./
+        cp -rf ./tmp/helloworld/lua-neturl ./
+        cp -rf ./tmp/helloworld/ipt2socks ./
+        cp -rf ./tmp/helloworld/hysteria ./
+        cp -rf ./tmp/helloworld/gn ./
+        cp -rf ./tmp/helloworld/dns2tcp ./
+        cp -rf ./tmp/helloworld/dns2socks ./
+        cp -rf ./tmp/helloworld/chinadns-ng ./
+    - name: Apply commit changes
+      run: |
+        git add ./luci-app-ssr-plus/ ./tcping/ ./naiveproxy/ ./xray-core/ ./xray-plugin/ ./v2raya/ ./v2ray-plugin/ ./v2ray-core/ ./tuic-client/ ./trojan/ ./simple-obfs/ ./shadowsocksr-libev/ ./shadowsocks-rust/ ./shadow-tls/ ./redsocks2/ ./mosdns/ ./microsocks/ ./naiveproxy/ ./naiveproxy/ ./lua-neturl/ ./ipt2socks/ ./hysteria/ ./gn/ ./dns2tcp/ ./dns2socks/ ./chinadns-ng/
+        echo -e "[bot] openwrt-helloworld: update\n\nlatest commit: $(cat ./tmp/helloworld/.git/refs/heads/master)" > ./tmp/message
+        git commit --file="./tmp/message" || exit 0
+    - name: Push Commits
+      env:
+        DOWNSTREAM_BRANCH: main
+      run: git push origin $DOWNSTREAM_BRANCH
